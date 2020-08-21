@@ -1,5 +1,6 @@
 #include "key.h"
 #include "delay.h"
+#include "flash.h"
 u8 calibration_std = 0;
 #define KEY_PRESS_TIME 700
 
@@ -155,9 +156,18 @@ u8 key_scan(void)
 	{
 			return KEY_1_PRES;
 	}
-	if(Calibration_key_driver() ==  KEY_CALI2_LONG)
+if(Calibration_key_driver() ==  KEY_CALI2_LONG)
 	{
+		if ((get_device_state (  )  == OFF)&&(flash_info.correct_std == 0))
+		{
 	  calibration_std = 1;
+			 flash_info.correct_std = 1;
+			flah_save_data();
+		}
+		else
+		{	
+		calibration_std = 0;	
+		}
 	}
 	else if(key_up && (KEY_2 == 0 || KEY_3 == 0)&&(calibration_std == 0))
 	{

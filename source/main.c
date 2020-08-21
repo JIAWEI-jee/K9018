@@ -11,7 +11,7 @@
 #include "adc.h"
 #include "wdt.h"
 
-#define SKU 9014
+#define SKU 9018
 #define SOFT_VER "1.00.00"
 
 u16 adc_cnt = 0;
@@ -130,7 +130,7 @@ u16 calibration_temperature(u16 temper)
 	{	
 		temp1 = (u8)temper;
 		usart_rx_flag = 0;
- 
+    flash_info.correct_std = 1;
 //		hal_uart_putchar(temp1);
 //		hal_uart_putchar(temper_val);
 	 if (temper_val > 15)	

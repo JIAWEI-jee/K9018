@@ -2,7 +2,7 @@
 #include "uart.h"
 #include "timer.h"
 
-flash_info_t flash_info = {0,0,0,0};
+flash_info_t flash_info = {0,0,0,0,0};
 u8 flash_check[4] = {0x20,0x20,0x05,0x01};
 u8 device_state = OFF;
 
