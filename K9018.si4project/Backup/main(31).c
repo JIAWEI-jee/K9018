@@ -184,7 +184,7 @@ u16 temp_calc ( u16 uR510,u16 uRw )
  
 	u1 = (  (( float ) uRw /1000) - (( float ) uR510/1000) ) / (( ( float ) uR510/1000)/510 );
 	if (u1 < 0)  return 0xff;
-//	gm_printf ( "R = %f  \r\n",u1 );
+	gm_printf ( "R = %f  \r\n",u1 );
 	if (u1 < 450) return 0;
 	if ( u1 > Temperature_Value )
 	{
@@ -224,7 +224,7 @@ void temperature_handle ( void )
 
 		//	KEY_printf ( "adv1 = %d adv3 =%d \r\n",adc_val1,adc_val3 );  //pjw set
 		temp = temp_calc ( adc_val1, adc_val3 );
-//			KEY_printf ( "temp val:%d \r\n",temp );
+			KEY_printf ( "temp val:%d \r\n",temp );
 	temp =	calibration_temperature(temp);
 		KEY_printf ( "%d \r\n",temp );
     

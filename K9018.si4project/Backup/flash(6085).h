@@ -57,7 +57,7 @@ typedef enum GAP_TEMP
 		corrected_value_GAP_6_temp	= 5,
 		corrected_value_GAP_7_temp	= 8,
 		corrected_value_GAP_8_temp	= 8,
-		corrected_value_GAP_9_temp	= 8,
+		corrected_value_GAP_9_temp	= 1,
 	
 	};
 
