@@ -190,14 +190,14 @@ u16 temp_calc ( u16 uR510,u16 uRw )
 	{
 		
      i =  u1 - Temperature_Value;
-		i= i/2.3;
+		i= i/2.2;
 		basi_tmp = basi_tmp + i;
 		//gm_printf("basi_up20 = %d \r\n",basi_tmp);
 	}
 	else
 	{
 		i =Temperature_Value - u1;
-		i= i/2.3;
+		i= i/2.2;
 		if (i > 20) i = 20;
 		basi_tmp = basi_tmp - i;
 		
