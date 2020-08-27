@@ -10,6 +10,7 @@
 #include "lcd_display.h"
 #include "adc.h"
 #include "wdt.h"
+#include "PID.h"
 
 #define SKU 9018
 #define SOFT_VER "1.00.00"
@@ -17,7 +18,7 @@
 u16 adc_cnt = 0;
 u8  first_heat_std = 0,fault_std = 0;
 
-void Set_Temp ( u16 temp );
+void Set_Temp ( u8 gap );
 void Controll_Heat ( u16 temp_set,u16 temp_now );
 void Protect ( void );
 void Error ( void );
@@ -43,13 +44,12 @@ static void key_handle ( void )
 	{
 		key_val = 0;
 	}
-	if ( (key_val == KEY_1_PRES)&&(calibration_std == 0) )
+	if ( ( key_val == KEY_1_PRES ) && ( calibration_std == 0 ) )
 	{
-		KEY_printf ( " key_scan\r\n" );
 
 		if ( get_device_state() == ON )
 		{
-			
+
 			set_device_state ( OFF );
 			ht1621_all_clear();
 			set_pwm ( 0 );
@@ -61,6 +61,7 @@ static void key_handle ( void )
 			
 			first_heat_std = 1;
 			set_correct_time ( flash_info.gap );
+			Set_Temp ( flash_info.gap );
 			lcd_display_gap ( flash_info.gap );
 			lcd_display_time ( flash_info.timer );
       
@@ -74,7 +75,7 @@ static void key_handle ( void )
 		if ( key_val == KEY_2_PRES ) //档位
 		{
 
-			KEY_printf ( " KEY_2_PRES\r\n" );
+
 			if ( flash_info.gap < GAP_9 )
 			{
 				flash_info.gap++;
@@ -98,6 +99,7 @@ static void key_handle ( void )
 
 			first_heat_std = 1;
 			set_correct_time ( flash_info.gap );
+			Set_Temp ( flash_info.gap );
 			lcd_display_gap ( flash_info.gap );
 			//set_time_sec();
 			flah_save_data();
@@ -130,43 +132,42 @@ u16 calibration_temperature(u16 temper)
 	{	
 		temp1 = (u8)temper;
 		usart_rx_flag = 0;
-    flash_info.correct_std = 1;
-//		hal_uart_putchar(temp1);
-//		hal_uart_putchar(temper_val);
-	 if (temper_val > 15)	
-	 { 
-		if (temper_val > temp1)
-		{
-		  flash_info.correct_value = temper_val - temp1;
-			flash_info.correct_sign = 1; //为正公差
-		}
-		else 
-		{
-		 flash_info.correct_value = temp1 - temper_val;
-			
-			hal_uart_putchar(flash_info.correct_value);
-		 flash_info.correct_sign = 2; //为负公差
-		}	
-		if ((flash_info.correct_value < 2)||(flash_info.correct_value > 20))
-		{
-		   flash_info.correct_value = 0;
-			 flash_info.correct_sign = 0;
-		}
-		flah_save_data();
-		producte_send_cmd(0x02, 0x02);
-	 }
-	}
-		if (flash_info.correct_sign == 1)
-	{
-	 return ((u16) (temper = temper + flash_info.correct_value) );
-	}
-	else if ( flash_info.correct_sign == 2)
-	{
-	 return ((u16) (temper = temper - flash_info.correct_value) );
-	}
-	return ((u16) temper );
+		flash_info.correct_std = 1;
 
-}	
+		if ( temper_val > 15 )
+		{
+			if ( temper_val > temp1 )
+			{
+				flash_info.correct_value = temper_val - temp1;
+				flash_info.correct_sign = 1; //为正公差
+			}
+			else
+			{
+				flash_info.correct_value = temp1 - temper_val;
+
+				hal_uart_putchar ( flash_info.correct_value );
+				flash_info.correct_sign = 2; //为负公差
+			}
+			if ( ( flash_info.correct_value < 2 ) || ( flash_info.correct_value > 20 ) )
+			{
+				flash_info.correct_value = 0;
+				flash_info.correct_sign = 0;
+			}
+			flah_save_data();
+			producte_send_cmd ( 0x02, 0x02 );
+		}
+	}
+	if ( flash_info.correct_sign == 1 )
+	{
+		return ( ( u16 ) ( temper = temper + flash_info.correct_value ) );
+	}
+	else if ( flash_info.correct_sign == 2 )
+	{
+		return ( ( u16 ) ( temper = temper - flash_info.correct_value ) );
+	}
+	return ( ( u16 ) temper );
+
+}
 
 
 
@@ -224,10 +225,10 @@ void temperature_handle ( void )
 
 		//	KEY_printf ( "adv1 = %d adv3 =%d \r\n",adc_val1,adc_val3 );  //pjw set
 		temp = temp_calc ( adc_val1, adc_val3 );
-			KEY_printf ( "temp val:%d \r\n",temp );
-	temp =	calibration_temperature(temp);
-		KEY_printf ( "cali_temp val:%d \r\n",temp );
-    
+		//KEY_printf ( "temp val:%d \r\n",temp );
+		temp =	calibration_temperature ( temp );
+		KEY_printf ( "%d \r\n",temp );
+
 		if ( adc_val1 >50 )
 		{
 			if ( get_device_state() == ON )
@@ -242,29 +243,31 @@ void temperature_handle ( void )
 					}
 					else
 					{
-						Heat_start_std = 2;one_heat = 1;
+						Heat_start_std = 2;
+						one_heat = 1;
 						Open_Heat_Value = corrected_value_warm_temp	;
 					}
 				}
-        
+				spid.iCurVal = temp*10;
+				PID_Operation ();
 				lcd_display_time ( flash_info.timer );
 				lcd_display_gap ( flash_info.gap );
-				Set_Temp ( temp );
+				//	Set_Temp ( temp );
 			}
 			else
 			{
-				if (calibration_std == 1)
+				if ( calibration_std == 1 )
 				{
-						set_pwm ( 0 );
+					set_pwm ( 0 );
 					ht1621_all_clear();
-				 lcd_display_gap ( flash_info.gap );
+					lcd_display_gap ( flash_info.gap );
 					cali_display_std = 1;
 				}
 				else
-				{	
-				set_pwm ( 0 );
-				ht1621_send_cmd ( LCD_OFF );
-				}	
+				{
+					set_pwm ( 0 );
+					ht1621_send_cmd ( LCD_OFF );
+				}
 			}
 			fault_std = 0;
 		}
@@ -300,8 +303,8 @@ void main ( void )
 	pwm_init ( 200 );
 	init_lcd_ht1621b();
 	delay_ms ( 800 );
-	//ht1621_all_clear(); //消除鬼影
 	wdt_init ( 2 );
+	PID_Init();
 	set_pwm ( 0 );
 	gm_printf ( "\r\n==================================\r\n" );
 	gm_printf ( "sku:K%d \r\n", ( u16 ) SKU );
@@ -314,8 +317,8 @@ void main ( void )
 	{
 		key_handle();
 		temperature_handle();
-	 // Protect();
-		//uart_handle();
+		// Protect();
+
 		clear_wdt();
 
 	}
@@ -338,50 +341,41 @@ void Controll_Heat ( u16 temp_set,u16 temp_now )
 	}
 }
 
-void Set_Temp ( u16 temp )
+void Set_Temp ( u8 gap )
 {
-	if ( one_heat == 1 )
-	{
-		//KEY_printf ( "oneheat \r\n");
-		Controll_Heat ( One_Heat_Temp,temp );
-	}
-	else
-	{
-	//	KEY_printf ( "twoheat \r\n");
-		switch ( flash_info.gap )
-		{
-			case GAP_WARM:
-				Controll_Heat ( GAP_WARM_temp,temp );
-				break;
-			case GAP_1:
-				Controll_Heat ( GAP_1_temp,temp );
-				break;
-			case GAP_2:
-				Controll_Heat ( GAP_2_temp,temp );
-				break;
-			case GAP_3:
-				Controll_Heat ( GAP_3_temp,temp );
-				break;
-			case GAP_4:
-				Controll_Heat ( GAP_4_temp,temp );
-				break;
-			case GAP_5:
-				Controll_Heat ( GAP_5_temp,temp );
-				break;
-			case GAP_6:
-				Controll_Heat ( GAP_6_temp,temp );
-				break;
-			case GAP_7:
-				Controll_Heat ( GAP_7_temp,temp );
-				break;
-			case GAP_8:
-				Controll_Heat ( GAP_8_temp,temp );
-				break;
-			case GAP_9:
-				Controll_Heat ( GAP_9_temp,temp );
-				break;
 
-		}
+	switch ( gap )
+	{
+		case GAP_WARM:
+			spid.iSetVal = GAP_WARM_temp*10;
+			break;
+		case GAP_1:
+			spid.iSetVal = GAP_1_temp*10;
+			break;
+		case GAP_2:
+			spid.iSetVal = GAP_2_temp*10;
+			break;
+		case GAP_3:
+			spid.iSetVal = GAP_3_temp*10;
+			break;
+		case GAP_4:
+			spid.iSetVal = GAP_4_temp*10;
+			break;
+		case GAP_5:
+			spid.iSetVal = GAP_5_temp*10;
+			break;
+		case GAP_6:
+			spid.iSetVal = GAP_6_temp*10;
+			break;
+		case GAP_7:
+			spid.iSetVal = GAP_7_temp*10;
+			break;
+		case GAP_8:
+			spid.iSetVal = GAP_8_temp*10;
+			break;
+		case GAP_9:
+			spid.iSetVal = GAP_9_temp*10;
+			break;
 	}
 }
 

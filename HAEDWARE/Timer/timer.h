@@ -2,6 +2,7 @@
 #define __TIMER_H__
 #include "HC89F303.h"
 
+#define pwm_count        100
 #define overrang_time   (60*60*2)
 #define Heat_Value      (60*4)
 #define Length          8

@@ -2,6 +2,8 @@
 #include "flash.h"
 #include "uart.h"
 #include "lcd_display.h"
+#include "PID.h"
+#include "pwm.h"
 
 //----------------time---------------
 u8 time_cnt = 0;
@@ -16,6 +18,24 @@ u16 time_heat = 0;
 u16 temp_time = 0 ;
 u16 correct_time = 0;
 u8 one_heat = 0;
+
+u16 pwm_jishu = 0;
+void Heat_Operation(u16 temp)
+{
+   pwm_jishu++;
+   if (temp > pwm_jishu) 
+   {
+	   set_pwm ( 10 );
+	   
+   }	   
+	else
+	{
+		set_pwm ( 0 );
+		
+	}
+	if (pwm_jishu == pwm_count ) pwm_jishu =0;
+}
+
 
 void set_time_sec_val ( u16 sec )
 {
@@ -250,6 +270,7 @@ void TIMER0_Rpt ( void ) interrupt TIMER0_VECTOR
 			//gm_printf("time_sec=%d \r\n",time_sec);
 			time_cnt = 0;
 		}
+		 Heat_Operation(spid.iPriVal);
 	}
 }
 
