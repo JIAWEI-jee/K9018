@@ -274,3 +274,29 @@ void TIMER0_Rpt ( void ) interrupt TIMER0_VECTOR
 	}
 }
 
+void time_Print ( void )
+{
+	switch ( ++temp_time )
+	{
+		case H_0_5:
+			gm_printf ( "time_to_0.5H  time_sec=%d \r\n",time_sec );
+			temp_time = 0;
+			break;
+		case H_1_0:
+			gm_printf ( "time_to_1H  time_sec=%d \r\n",time_sec );
+			temp_time = 0;
+			break;
+		case H_2_0:
+			gm_printf ( "time_to_2H  time_sec=%d \r\n",time_sec );
+			temp_time = 0;
+			break;
+		case H_4_0:
+			gm_printf ( "time_to_4H  time_sec=%d \r\n",time_sec );
+			temp_time = 0;
+			break;
+		case H_8_0:
+			gm_printf ( "time_to_8H  time_sec=%d \r\n",time_sec );
+			temp_time = 0;
+			break;
+	}
+}
