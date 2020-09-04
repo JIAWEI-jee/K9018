@@ -258,6 +258,7 @@ void TIMER0_Rpt ( void ) interrupt TIMER0_VECTOR
 	  if(++exti_cail_cnt > cali_time)
 		{
 		  calibration_std = 0;
+		  exti_cail_cnt = 0;
 		}
 	}
 }
