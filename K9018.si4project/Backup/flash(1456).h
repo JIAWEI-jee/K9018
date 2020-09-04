@@ -71,7 +71,7 @@ typedef enum GAP_TEMP
 			corrected_time_GAP_4_temp	= 60*4,
 			corrected_time_GAP_5_temp	= 60*6,
 			corrected_time_GAP_6_temp	= 60*8,
-			corrected_time_GAP_7_temp	= 60*16,
+			corrected_time_GAP_7_temp	= 60*12,
 			corrected_time_GAP_8_temp	= 60*16,
 			corrected_time_GAP_9_temp	= 60*30,
 		
