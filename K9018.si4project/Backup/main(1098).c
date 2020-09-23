@@ -301,9 +301,7 @@ void main ( void )
 	pwm_init ( 200 );
 	init_lcd_ht1621b();
 	delay_ms ( 800 );
-	ht1621_all_clear(); //消除鬼影
-	lcd_display_gap ( GAP_2 );
-	delay_ms ( 500 );
+	//ht1621_all_clear(); //消除鬼影
 	wdt_init ( 2 );
 	set_pwm ( 0 );
 	gm_printf ( "\r\n==================================\r\n" );
@@ -318,6 +316,7 @@ void main ( void )
 		key_handle();
 		temperature_handle();
 	 // Protect();
+		//uart_handle();
 		clear_wdt();
 
 	}
